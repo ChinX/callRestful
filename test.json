@@ -1,0 +1,33 @@
+{
+  "kind":"CCloud",
+  "apiVersion":"v1",
+  "metadata":{
+    "name":"testPipeline",
+    "namespace":"pipelineNamespace",
+    "selfLink":"",
+    "timeoutDuration":120
+  },
+  "spec":[
+    {
+      "name":"redismaster",
+      "dependence":"",
+      "statusCheckLink":"",
+      "statusCheckInterval":30,
+      "statusCheckCount":3,
+      "replicsa":1,
+      "image":"redis-master",
+      "port":6379
+    },
+    {
+      "name":"redisslave",
+      "dependence":"TestMasterServices",
+      "kind":"backup",
+      "status_check_url":"",
+      "status_check_interval":30,
+      "status_check_count":3,
+      "replicsa":2,
+      "image":"redis-slave",
+      "port":6379
+    }
+  ]
+}
