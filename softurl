@@ -12,3 +12,100 @@ https://plugins.jetbrains.com/files/4230/26121/BashSupport-1.5.8.162.zip
 
 http://nchc.dl.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/rubenvb/gcc-4.8-release/x86_64-w64-mingw32-gcc-4.8.0-win64_rubenvb.7z
 https://cmake.org/files/v3.7/cmake-3.7.0-rc1-win64-x64.msi
+
+
+To check your current kernel version, open a terminal and use uname -r to display your kernel version:
+
+$ uname -r
+3.11.0-15-generic
+Note: If you previously installed Docker using APT, make sure you update your APT sources to the new Docker repository.
+Update your apt sources
+Docker’s APT repository contains Docker 1.7.1 and higher. To set APT to use packages from the Docker repository:
+
+Log into your machine as a user with sudo or root privileges.
+Open a terminal window.
+Update package information, ensure that APT works with the https method, and that CA certificates are installed.
+$ sudo apt-get update
+$ sudo apt-get install apt-transport-https ca-certificates
+Add the new GPG key.
+$ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+Find the entry for your Ubuntu operating system.
+The entry determines where APT will search for packages. The possible entries are:
+Ubuntu version	Repository
+Precise 12.04 (LTS)	deb https://apt.dockerproject.org/repo ubuntu-precise main
+Trusty 14.04 (LTS)	deb https://apt.dockerproject.org/repo ubuntu-trusty main
+Xenial 16.04 (LTS)	deb https://apt.dockerproject.org/repo ubuntu-xenial main
+Note: Docker does not provide packages for all architectures. Binary artifacts are built nightly, and you can download them from https://master.dockerproject.org. To install docker on a multi-architecture system, add an [arch=...] clause to the entry. Refer to Debian Multiarch wiki for details.
+Run the following command, substituting the entry for your operating system for the placeholder <REPO>.
+$ echo "<REPO>" | sudo tee /etc/apt/sources.list.d/docker.list
+Update the APT package index.
+$ sudo apt-get update
+Verify that APT is pulling from the right repository.
+When you run the following command, an entry is returned for each version of Docker that is available for you to install. Each entry should have the URL https://apt.dockerproject.org/repo/. The version currently installed is marked with ***.The output below is truncated.
+$ apt-cache policy docker-engine
+
+  docker-engine:
+    Installed: 1.12.2-0~trusty
+    Candidate: 1.12.2-0~trusty
+    Version table:
+   *** 1.12.2-0~trusty 0
+          500 https://apt.dockerproject.org/repo/ ubuntu-trusty/main amd64 Packages
+          100 /var/lib/dpkg/status
+       1.12.1-0~trusty 0
+          500 https://apt.dockerproject.org/repo/ ubuntu-trusty/main amd64 Packages
+       1.12.0-0~trusty 0
+          500 https://apt.dockerproject.org/repo/ ubuntu-trusty/main amd64 Packages
+       1.11.2-0~trusty 0
+          500 https://apt.dockerproject.org/repo/ ubuntu-trusty/main amd64 Packages
+       1.11.1-0~trusty 0
+          500 https://apt.dockerproject.org/repo/ ubuntu-trusty/main amd64 Packages
+From now on when you run apt-get upgrade, APT pulls from the new repository.
+Prerequisites by Ubuntu Version
+Ubuntu Xenial 16.04 (LTS)
+Ubuntu Trusty 14.04 (LTS)
+For Ubuntu Trusty, and Xenial, it’s recommended to install the linux-image-extra-* kernel packages. The linux-image-extra-* packages allows you use the aufs storage driver.
+
+To install the linux-image-extra-* packages:
+
+Open a terminal on your Ubuntu host.
+Update your package manager.
+ $ sudo apt-get update
+Install the recommended packages.
+ $ sudo apt-get install linux-image-extra-$(uname -r) linux-image-extra-virtual
+Go ahead and install Docker.
+Ubuntu Precise 12.04 (LTS)
+For Ubuntu Precise, Docker requires the 3.13 kernel version. If your kernel version is older than 3.13, you must upgrade it. Refer to this table to see which packages are required for your environment:
+
+Package	Description
+linux-image-generic-lts-trusty	Generic Linux kernel image. This kernel has AUFS built in. This is required to run Docker.
+linux-headers-generic-lts-trusty	Allows packages such as ZFS and VirtualBox guest additions which depend on them. If you didn't install the headers for your existing kernel, then you can skip these headers for the"trusty" kernel. If you're unsure, you should include this package for safety.
+xserver-xorg-lts-trusty	Optional in non-graphical environments without Unity/Xorg. Required when running Docker on machine with a graphical environment.
+
+To learn more about the reasons for these packages, read the installation instructions for backported kernels, specifically the LTS Enablement Stack — refer to note 5 under each version.
+libgl1-mesa-glx-lts-trusty
+To upgrade your kernel and install the additional packages, do the following:
+
+Open a terminal on your Ubuntu host.
+Update your package manager.
+ $ sudo apt-get update
+Install both the required and optional packages.
+ $ sudo apt-get install linux-image-generic-lts-trusty
+Depending on your environment, you may install more as described in the preceding table.
+Reboot your host.
+ $ sudo reboot
+After your system reboots, go ahead and install Docker.
+Install
+Make sure you have installed the prerequisites for your Ubuntu version.
+
+Then, install Docker using the following:
+
+Log into your Ubuntu installation as a user with sudo privileges.
+Update your APT package index.
+ $ sudo apt-get update
+Install Docker.
+ $ sudo apt-get install docker-engine
+Start the docker daemon.
+ $ sudo service docker start
+Verify docker is installed correctly.
+ $ sudo docker run hello-world
+This command downloads a test image and runs it in a container. When the container runs, it prints an informational message. Then, it exits.
