@@ -65,6 +65,20 @@ func NewUUID() (string, error) {
 	return fmt.Sprintf(UUIDFormat, u[:4], u[4:6], u[6:8], u[8:10], u[10:]), nil
 }
 
+// NewRandom create a mew random str
+func NewRandom(n int)(string, error){
+	var u [n]byte
+
+	if _, err := rand.Read(u[:]); err != nil {
+		return "", err
+	}
+
+	for k,v := range u {
+		u[k] =  strPool[int(v%len(strPool))]
+	}
+	return string(u), nil
+}
+
 // IsDirExist checks if a dir exists
 func IsDirExist(path string) bool {
 	fi, err := os.Stat(path)
