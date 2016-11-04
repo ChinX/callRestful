@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -25,6 +26,8 @@ var (
 	lastNum  int64
 	count    int
 )
+
+const UUIDFormat = "%08x-%04x-%04x-%04x-%012x"
 
 func init() {
 	uuidLock = new(sync.Mutex)
@@ -45,27 +48,49 @@ func UUID() string {
 	return MD5(strconv.Itoa(int(lastNum)) + strconv.Itoa(count))
 }
 
+// NewUUID creates a new, version 4 uuid
+func NewUUID() (string, error) {
+	// UUID representation compliant with specification described in RFC 4122.
+	var u [16]byte
+
+	if _, err := rand.Read(u[:]); err != nil {
+		return "", err
+	}
+
+	// SetVersion sets version bits.
+	u[6] = (u[6] & 0x0f) | (4 << 4)
+	// SetVariant sets variant bits as described in RFC 4122.
+	u[8] = (u[8] & 0xbf) | 0x80
+
+	return fmt.Sprintf(UUIDFormat, u[:4], u[4:6], u[6:8], u[8:10], u[10:]), nil
+}
+
+// IsDirExist checks if a dir exists
 func IsDirExist(path string) bool {
 	fi, err := os.Stat(path)
 	log.Println(err)
 	return err == nil && fi.IsDir() || os.IsExist(err)
 }
 
+// IsFileExist checks if a file exists
 func IsFileExist(path string) bool {
 	fi, err := os.Stat(path)
 	return err == nil && !fi.IsDir() || os.IsExist(err)
 }
 
+// MD5 creates md5 string for an input key
 func MD5(input string) string {
 	h := md5.New()
 	h.Write([]byte(input))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+// SHA512 creates sha512 string for an input bytes
 func SHA512(byteArr []byte) (string, error) {
 	return SHA512Stream(bytes.NewReader(byteArr))
 }
 
+// SHA512 creates sha512 string for an input reader
 func SHA512Stream(reader io.Reader) (string, error) {
 	hashed := sha512.New()
 	io.Seeker(reader).Seek(0, 0)
@@ -75,18 +100,8 @@ func SHA512Stream(reader io.Reader) (string, error) {
 	return hex.EncodeToString(hashed.Sum(nil))
 }
 
-func Compare(a, b string) int {
-	switch {
-	case a == b:
-		return 0
-	case a < b:
-		return -1
-	default:
-		return 1
-	}
-}
-
-func GenerateRSAkeyPair(bits int) ([]byte, []byte, error) {
+// GenerateRSAKeyPair generate a private key and a public key
+func GenerateRSAKeyPair(bits int) ([]byte, []byte, error) {
 	prvKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		return nil, nil, err
@@ -105,6 +120,7 @@ func GenerateRSAkeyPair(bits int) ([]byte, []byte, error) {
 	return pem.EncodeToMemory(prvBlock), pem.EncodeToMemory(pubBlock), nil
 }
 
+// RSAEncrypt encrypts a content by a public key
 func RSAEncrypt(keyBytes, contentBytes []byte) ([]byte, error) {
 	pubKey, err := getPubKey(keyBytes)
 	if err != nil {
@@ -113,6 +129,7 @@ func RSAEncrypt(keyBytes, contentBytes []byte) ([]byte, error) {
 	return rsa.DecryptPKCS1v15(rand.Reader, pubKey, contentBytes)
 }
 
+// RSADecrypt decrypts a content by a private key
 func RSADecrypt(keyBytes, contentBytes []byte) ([]byte, error) {
 	prvKey, err := getPrvKey(keyBytes)
 	if err != nil {
@@ -121,6 +138,7 @@ func RSADecrypt(keyBytes, contentBytes []byte) ([]byte, error) {
 	return rsa.DecryptPKCS1v15(rand.Reader, prvKey, contentBytes)
 }
 
+// SHA256Sign signs a content by a private key
 func SHA256Sign(keyBytes, contentBytes []byte) ([]byte, error) {
 	prvKey, err := getPrvKey(keyBytes)
 	if err != nil {
@@ -131,6 +149,7 @@ func SHA256Sign(keyBytes, contentBytes []byte) ([]byte, error) {
 	return rsa.SignPKCS1v15(rand.Reader, prvKey, crypto.SHA256, hashed[:])
 }
 
+// SHA256Verify verifies if a content is valid by a signed data and a public key
 func SHA256Verify(keyBytes, contentBytes, signBytes []byte) error {
 	pubKey, err := getPubKey(keyBytes)
 	if err != nil {
