@@ -70,6 +70,7 @@ Ubuntu Trusty 14.04 (LTS)
 For Ubuntu Trusty, and Xenial, it’s recommended to install the linux-image-extra-* kernel packages. The linux-image-extra-* packages allows you use the aufs storage driver.
 
 To install the linux-image-extra-* packages:
+$ apt-get install -y docker-engine=1.12.1-0~trusty
 
 Open a terminal on your Ubuntu host.
 Update your package manager.
