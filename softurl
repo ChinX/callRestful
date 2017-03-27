@@ -20,6 +20,8 @@ idea-docker: https://plugins.jetbrains.com/files/7724/30315/Docker-plugin.zip
 idea-redis:  https://plugins.jetbrains.com/files/9228/31086/iedis-1.0-release.zip
 idea-mongo:  https://raw.githubusercontent.com/dboissier/mongo4idea/master/snapshot/mongo4idea-0.10.2016-distribution.zip
 
+https://toutiao.io/posts/vgduvc/preview
+
 
 
 设置 MariaDB 仓库
