@@ -128,7 +128,7 @@ else
 fi
 
 if [ ${needUpdateMirror} -eq 0 ]; then
-    sed -i 's/docker daemon \$OPTIONS \\/docker daemon --live-restore --log-opt max-size=50m --log-opt max-file=20 --log-driver=json-file --registry-mirror=https:\/\/'${registryAdd}'/g' ${dockerServiceEtc}
+    sed -i 's/docker daemon \$OPTIONS \\/docker daemon --live-restore --log-opt max-size=50m --log-opt max-file=20 --log-driver=json-file --registry-mirror=https:\/\/registry.docker-cn.com  --insecure-registry='${registryAdd}'/g' ${dockerServiceEtc}
     sed -i 's/\$DOCKER_STORAGE_OPTIONS \\//g' ${dockerServiceEtc}
     sed -i 's/\$DOCKER_NETWORK_OPTIONS \\//g' ${dockerServiceEtc}
     sed -i 's/\$INSECURE_REGISTRY//g' ${dockerServiceEtc}
