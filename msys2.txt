@@ -1,0 +1,116 @@
+一、msys2
+    1、安装 msys2
+        在浏览器中打开 http://repo.msys2.org/distrib/x86_64/，下载安装
+    2、修改/etc/pacman.d/源文件
+    3、更新
+        pacman -Syu
+    4、常用命令：
+        pacman -S pkgname1 pkgname2 ...                 安装指定的包
+        pacman -S extra/package_name                    多版本选择安装（例：extra和testing）
+        pacman -S plasma-{desktop,mediacenter,nm}       安装含有相似名称的软件包（例：plasma开头）
+        pacman -S gnome                                 安装指定的包组,会提醒用户选择 gnome 内需要安装的包
+            Enter a selection (default=all): 1-10 15    将选中序号 1 至 10 和 15 的软件包
+            Enter a selection (default=all): ^5-8 ^2    将会选中除了序号 5 至 8 和 2 之外的所有软件包
+        pacman -Sg gnome                                查看 gnome 组所辖包
+
+        pacman -R package_name                          仅删除单个软件包
+        pacman -Rs package_name                         删除指定软件包，及其所有没有被其他已安装软件包使用的依赖关系
+        pacman -Rsc package_name                        删除软件包和所有依赖这个软件包的程序
+        pacman -Rdd package_name                        删除软件包，但是不删除依赖这个软件包的其他程序
+        pacman -Rn package_name                         删除某些软件会生成重要文件备份，-n 可以避免生成
+
+        pacman -Syu                                     升级软件包
+
+        pacman -Qs string1 string2 ...                  查询已安装的软件包
+        pacman -Ss string1 string2 ...                  查询可以安装的软件包
+            -g 查看软件组   -l 查询软件包的内容   -s 查询软件所在的包
+        pactree package_name                            显示软件包的依赖树
+        whoneeds package_name                           检查一个安装的软件包被那些包依赖
+
+        pacman -Sc                                      清除未安装软件包的缓存
+        pacman -Scc                                     可以清理所有缓存，但重装时需重新下载
+                                                        缓存目录/var/cache/pacman/pkg/
+    5、查看工具帮助
+        pacman -h ；pacman -S -h
+
+    6、安装基本编译套件
+        pacman -S gcc base-devel
+
+    7、安装git
+        pacman -S git
+
+    8、中文乱码
+        a、 vim /usr/bin/win
+            #!/bin/bash
+            $@ |iconv -f gbk -t utf-8
+
+        b、 vim /etc/profile.d/alias.sh
+            alias ls="/bin/ls --color=tty --show-control-chars"
+            alias grep="/bin/grep --color"
+            alias ll="/bin/ls --color=tty --show-control-chars -l"
+
+            alias ping="/bin/win ping"
+            alias netstat="/bin/win netstat"
+            alias nslookup="/bin/win nslookup"
+            alias ipconfig="/bin/win ipconfig"
+
+    9、常用目录挂载
+        vim .bash_profile
+        mount -fo binary,noacl,posix=0,user D:/docs ~/docs
+
+
+二、git设置
+    1、关闭dos和unix转换
+        git config --global core.autocrlf input
+    2、 KDiff3 用作 diff 和 merge 工具，装好后配置 Git：
+        下载地址：https://sourceforge.net/projects/kdiff3/files/kdiff3
+        git config --global merge.tool kdiff3
+        git config --global mergetool.kdiff3.path "F:/worktools/KDiff3/kdiff3.exe"
+        可以试一下 git mergetool 和 git difftool 看看是否配置正确了。
+        为避免每次用 git difftool 时都提示确认，下面两行也可以设一下：
+        git config --global mergetool.prompt false
+        git config --global difftool.prompt false
+
+三、vim配置
+    1、插件管理
+        mkdir -p ~/.vim/bundle
+        cd ~/.vim/bundle
+        git clone https://github.com/gmarik/Vundle.vim.git
+        vim ~/.vimrc
+        添加：
+            set rtp+=~/.vim/bundle/Vundle.vim
+            call vundle#begin()
+            :PluginInstall
+    2、配色管理
+        set t_Co=256 " required
+        colorscheme desert
+
+四、Cmder安装和配置
+    1、下载：http://cmder.net/
+    2、把 cmder 加到环境变量
+    3、添加 cmder 到右键菜单
+        Cmder.exe /REGISTER ALL
+    4、设置MSYS2_ROOT
+    5、配置Cmder启动项
+        set CHERE_INVOKING=1 & %MSYS2_ROOT%\usr\bin\bash.exe --login -i -new_console:C:"%MSYS2_ROOT%\msys2.ico"
+        
+        
+1、修改hosts
+127.0.0.1 license.sublimehq.com
+127.0.0.1 45.55.255.55
+127.0.0.1 45.55.41.223
+
+2、输入注册码
+—– BEGIN LICENSE —–
+TwitterInc
+200 User License
+EA7E-890007
+1D77F72E 390CDD93 4DCBA022 FAF60790
+61AA12C0 A37081C5 D0316412 4584D136
+94D7F7D4 95BC8C1C 527DA828 560BB037
+D1EDDD8C AE7B379F 50C9D69D B35179EF
+2FE898C4 8E4277A8 555CE714 E1FB0E43
+D5D52613 C3D12E98 BC49967F 7652EED2
+9D2D2E61 67610860 6D338B72 5CF95C69
+E36B85CC 84991F19 7575D828 470A92AB
+—— END LICENSE ——
