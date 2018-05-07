@@ -72,6 +72,8 @@
         为避免每次用 git difftool 时都提示确认，下面两行也可以设一下：
         git config --global mergetool.prompt false
         git config --global difftool.prompt false
+        
+        git config --global http.sslVerify false
 
 三、vim配置
     1、插件管理
