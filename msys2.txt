@@ -61,9 +61,11 @@
 
 二、git设置
     1、关闭dos和unix转换
-        git config --global core.autocrlf input
-    2、 KDiff3 用作 diff 和 merge 工具，装好后配置 Git：
+        git config --global core.autocrlf false
+    2、 KDiff3 用作 diff 和 merge 工具，装好后配置 Git：
         下载地址：https://sourceforge.net/projects/kdiff3/files/kdiff3
+        git config --global diff.tool kdiff3
+        git config --global difftool.kdiff3.path "F:/worktools/KDiff3/kdiff3.exe"
         git config --global merge.tool kdiff3
         git config --global mergetool.kdiff3.path "F:/worktools/KDiff3/kdiff3.exe"
         可以试一下 git mergetool 和 git difftool 看看是否配置正确了。
