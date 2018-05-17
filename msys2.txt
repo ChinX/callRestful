@@ -57,6 +57,24 @@
     9、常用目录挂载
         vim .bash_profile
         mount -fo binary,noacl,posix=0,user D:/docs ~/docs
+        
+    10、ls 速度问题
+        mkpasswd -l -c > /etc/passwd
+        mkgroup -l -c > /etc/group
+        
+        修改/etc/nsswitch.conf
+          # Begin /etc/nsswitch.conf
+
+          passwd: files # db
+          group: files # db
+
+          db_enum: cache builtin
+
+          db_home: env windows cygwin desc
+          db_shell: env windows # cygwin desc
+          db_gecos: env # cygwin desc
+
+          # End /etc/nsswitch.conf
 
 
 二、git设置
