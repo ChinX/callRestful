@@ -115,6 +115,8 @@
     4、设置MSYS2_ROOT
     5、配置Cmder启动项
         set CHERE_INVOKING=1 & %MSYS2_ROOT%\usr\bin\bash.exe --login -i -new_console:C:"%MSYS2_ROOT%\msys2.ico"
+    6、tabbar上移
+        TabsLocation = 00
         
         
 1、修改hosts
