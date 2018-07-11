@@ -1,0 +1,22 @@
+remotes:
+  - name: default
+    list:
+      - host: 192.168.0.111
+        port: 22
+        index: 0
+      - host: 192.168.0.111
+        port: 22
+        index: 1
+  - name: ubuntu
+    list:
+      - host: 192.168.0.112
+        port: 22
+        index: 0
+      - host: 192.168.0.114
+        port: 22
+        index: 1
+credentials:
+  - user: root
+    passwd: vessel
+  - user: root
+    passwd: vessel
