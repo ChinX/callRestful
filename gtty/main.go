@@ -5,13 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/chinx/rsa/cmd"
-	"github.com/chinx/rsa/setting"
+	"github.com/chinx/gtty/cmd"
 	"github.com/urfave/cli"
 )
 
 func main() {
-	err := setting.OpenConfig("./config/config.yaml")
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.Usage = "remote source access for golang"
@@ -22,7 +20,7 @@ func main() {
 		cmd.SFTP,
 	}
 
-	if err = app.Run(os.Args); err != nil {
+	if err := app.Run(os.Args); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

@@ -1,20 +1,28 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"net"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/chinx/rsa/model"
-	"github.com/chinx/rsa/setting"
+	"github.com/chinx/gtty/model"
+	"github.com/chinx/gtty/setting"
 	"github.com/urfave/cli"
 )
 
 var rgx = regexp.MustCompile(`^(\d+)\-(\d+)$`)
+
+var remoteDirFlag = cli.StringFlag{
+	Name:  "remote, r",
+	Usage: "remote open dir",
+}
+
+var currentDirFlag = cli.StringFlag{
+	Name:  "current, c",
+	Usage: "current open dir",
+}
 
 func remoteFromContext(context *cli.Context) (r *model.Remote, err error) {
 	args := context.Args()
@@ -34,33 +42,23 @@ func remoteFromContext(context *cli.Context) (r *model.Remote, err error) {
 		return
 	}
 
-	nr, err1 := remoteFromHost(r.Host)
-	if err1 == nil {
-		r = nr
-		return
+	nr, err := remoteFromHost(r.Host)
+	if err == nil {
+		if r.Port <= 0 {
+			r.Port = nr.Port
+		}
+
+		if r.User == "" {
+			r.User = nr.User
+		}
 	}
 
 	if r.Port <= 0 {
 		r.Port = 22
 	}
 
-	if r.User == "" {
-		r.User = "root"
-	}
-
-	if r.Passwd == "" && len(args) > 1 {
+	if len(args) > 1 {
 		r.Passwd = args[1]
-	}
-
-	if r.Passwd == "" {
-		inputReader := bufio.NewReader(os.Stdin)
-		fmt.Printf("Passwd is empty! Please enter new: ")
-		input, err3 := inputReader.ReadString('\n')
-		if err3 != nil || input == "" {
-			err = fmt.Errorf("Input passwd \"%s\"is error: %s ", input, err3)
-			return
-		}
-		r.Passwd = input
 	}
 	return
 }
@@ -142,19 +140,19 @@ func remoteFromIndex(index string) (r *model.Remote, err error) {
 
 func remoteFromHost(host string) (r *model.Remote, err error) {
 	for _, val := range setting.Root.Remotes {
-			for _, v := range val.List {
-				if v.Host == host {
-					credential := setting.Root.Credentials[v.Index]
-					r = &model.Remote{
-						Host:   v.Host,
-						Port:   v.Port,
-						User:   credential.User,
-						Passwd: credential.Passwd,
-					}
-					return
+		for _, v := range val.List {
+			if v.Host == host {
+				credential := setting.Root.Credentials[v.Index]
+				r = &model.Remote{
+					Host:   v.Host,
+					Port:   v.Port,
+					User:   credential.User,
+					Passwd: credential.Passwd,
 				}
-
+				return
 			}
+
+		}
 	}
 	err = fmt.Errorf("remote host \"%s\" is not fount", host)
 	return

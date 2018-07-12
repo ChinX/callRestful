@@ -4,11 +4,15 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/chinx/rsa/model"
+	"github.com/chinx/gtty/model"
 	"github.com/go-yaml/yaml"
 )
 
 var Root = model.RootGroup{}
+
+func init()  {
+	OpenConfig("./config/config.yaml")
+}
 
 func OpenConfig(fileName string) error {
 	if !IsFileExist(fileName) {

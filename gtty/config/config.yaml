@@ -1,7 +1,7 @@
 remotes:
   - name: default
     list:
-      - host: 192.168.0.111
+      - host: 192.168.0.110
         port: 22
         index: 0
       - host: 192.168.0.111

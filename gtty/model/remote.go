@@ -1,5 +1,7 @@
 package model
 
+const DefaultGroup = "default"
+
 type RemoteConfig struct {
 	Host  string `yaml:"host"`
 	Port  int    `yaml:"port"`
