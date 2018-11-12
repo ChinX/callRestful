@@ -1,0 +1,200 @@
+一、常规说明
+	1、请求参数：
+		path： 	通过url本体传递的参数
+			例：/v1/activities/{activity_id}  =>  /v1/activities/1
+				"{}" 为参数标示
+				"activity_id" 为url中的变量名
+				上例中请求时填写携带了对应的值	"1"
+				
+		query: 	通过url "?" 传递的参数
+			例： /v1/activities?from=0&count=30
+
+		body:	json结构体
+			例：	
+			{
+				"code": "微信授权码"
+			}
+
+	2、StatusCode：
+		成功：
+			POST：201
+			PUT： 201
+			PATCH：201
+			GET： 200
+		失败：
+			>= 400
+
+		详见：http://www.ruanyifeng.com/blog/2014/05/restful_api.html 【七、状态码(Status Codes)】
+
+	3、ResponseBody
+		成功：
+			接口定义的返回结构
+		失败：
+			{
+				"user_id": "用户id"，
+				"stauts": 0, //登录状态 (0:未授权 1:数据未绑定 2:登录成功)
+				"message": "错误信息"
+			} 
+
+			stauts为0时需获取微信授权码，调用后台登录接口
+			stauts为1时，需调用微信 "wx.getUserInfo" 接口，再调用后台绑定接口
+二、用户
+	1、微信授权登录
+		request：
+			url: /v1/user/login
+			method： POST
+			body: {
+				"code": "微信授权码"
+			}
+		response：
+			{
+				"user_id": "用户id"，
+				"stauts": 0,
+				"message": "错误信息"
+			}
+
+	2、绑定微信用户信息
+		request：
+			url: /v1/user/binding
+			method： POST
+			body: {
+				"signature": "微信数据签名"，
+				"rawData": "用户信息原始数据",
+				"encryptedData": "包含敏感信息的加密用户数据",
+				"iv": "加密算法向量"
+			}
+		response：
+			{
+				"user_id": "用户id"，
+				"stauts": 0,
+				"message": "错误信息"
+			}
+	3、退出登录
+		request：
+			url: /v1/user/logout
+			method： POST
+		response：
+			{
+				"user_id": "用户id"，
+				"stauts": 0,
+				"message": "错误信息"
+			}
+
+三、活动
+	1、获取活动列表
+		request：
+			url: /v1/activities
+			method： GET
+			query:
+				from: 分页请求开始的活动ID （默认0: 视为第一次获取）
+				count: 分页需要的条数 （默认值30： 0 < count < 100）
+		response：
+
+	2、获取活动详情：
+		request：
+			url: /v1/activities/{activity_id}
+			method： GET
+			path:
+				activity_id: 活动ID
+		response：
+
+	3、领取活动任务并自己砍价
+		request：
+			url: /v1/activities/{activity_id}/tasks
+			method： POST
+			path:
+				activity_id: 活动ID
+		response：
+
+	4、获取当前活动下用户领取的任务
+		request：
+			url: /v1/activities/{activity_id}/tasks
+			method： GET
+			path:
+				activity_id: 活动ID
+		response：
+
+	5、领取活动门票
+		request：
+			url: /v1/activities/{activity_id}/coupons
+			method： POST
+			path:
+				activity_id: 活动ID
+		response：
+
+	6、获取当前活动下用户领取的门票
+		request：
+			url: /v1/activities/{activity_id}/coupons
+			method： GET
+			path:
+				activity_id: 活动ID
+		response：
+
+四、砍价任务
+	1、获取用户任务列表
+		request：
+			url: /v1/tasks
+			method： GET
+			query:
+				from: 分页请求开始的任务ID （默认0: 视为第一次获取）
+				count: 分页需要的条数 （默认值30： 0 < count < 100）
+		response：
+
+	2、获取任务详细信息		
+		request：
+			url: /v1/tasks/{task_id}
+			method： GET
+			path:
+				task_id: 任务ID
+		response：
+
+	3、删除任务
+		request：
+			url: /v1/tasks/{task_id}
+			method： DELETE
+			path:
+				task_id: 任务ID
+		response：
+
+	4、为朋友砍价
+		request：
+			url: /v1/tasks/{task_id}/bargains
+			method： POST
+			path:
+				task_id: 任务ID
+		response：
+
+	5、获取当前任务下的砍价列表
+		request：
+			url: /v1/tasks/{task_id}/bargains
+			method： GET
+			path:
+				task_id: 任务ID
+			query:
+				from: 分页请求开始的砍价ID （默认0: 视为第一次获取）
+				count: 分页需要的条数 （默认值30： 0 < count < 100）
+		response：
+
+五、门票
+	1、获取用户门票列表
+		request：
+			url: /v1/coupons
+			method： GET
+			query:
+				from: 分页请求开始的门票ID （默认0: 视为第一次获取）
+				count: 分页需要的条数 （默认值30： 0 < count < 100）
+		response：
+	2、获取门票详情
+		request：
+			url: /v1/coupons/{coupon_id}
+			method： GET
+			path:
+				coupon_id: 门票ID
+		response：
+	3、删除/兑换实体门票
+		request：
+			url: /v1/coupons/{coupon_id}
+			method： DELETE
+			path:
+				coupon_id: 门票ID
+		response：
