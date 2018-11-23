@@ -104,6 +104,9 @@
             alias netstat="/bin/win netstat"
             alias nslookup="/bin/win nslookup"
             alias ipconfig="/bin/win ipconfig"
+            
+            export LANG="zh_CN.UTF-8"
+            export LC_ALL="zh_CN.UTF-8"
 
     7、常用目录挂载
         vim .bash_profile
