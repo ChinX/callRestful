@@ -1,396 +1,127 @@
-一、常规说明
-	1、请求参数：
-		path： 	通过url本体传递的参数
-			例：/v1/activities/{activity_id}  =>  /v1/activities/1
-				"{}" 为参数标示
-				"activity_id" 为url中的变量名
-				上例中请求时填写携带了对应的值	"1"
+package util
 
-		query: 	通过url "?" 传递的参数
-			例： /v1/activities?from=0&count=30
+import (
+	"crypto/tls"
+	"io"
+	"net"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+)
 
-		body:	json结构体
-			例：
-			{
-				"code": "微信授权码"
-			}
+var (
+	proxyURL  *url.URL
+	noProxies []string
+	TimeOut   = 10 * time.Second
+	KeepAlive = 10 * time.Second
+)
 
-	2、StatusCode：
-		成功：
-			POST：201
-			PUT： 201
-			PATCH：201
-			GET： 200
-		失败：
-			>= 400
+func RestGet(addr string, header map[string]string, params url.Values) (*http.Response, error) {
+	if params != nil{
+		if strings.Contains(addr, "?"){
+			addr += "&"
+		}else{
+			addr += "?"
+		}
+		addr += params.Encode()
+	}
+	return request(http.MethodGet, addr, header, nil)
+}
 
-		详见：http://www.ruanyifeng.com/blog/2014/05/restful_api.html 【七、状态码(Status Codes)】
+func RestPost(addr string, header map[string]string, body io.Reader) (*http.Response, error) {
+	return request(http.MethodPost, addr, header, body)
+}
 
-	3、ResponseBody
-		成功：
-			接口定义的返回结构
-		失败：
-			{
-				"user_id": "用户id"，
-				"stauts": 0, //登录状态 (0:未授权 1:数据未绑定 2:登录成功)
-				"message": "错误信息"
-			}
+func RestPut(addr string, header map[string]string, body io.Reader) (*http.Response, error) {
+	return request(http.MethodPut, addr, header, body)
+}
 
-			stauts为0时需获取微信授权码，调用后台登录接口
-			stauts为1时，需调用微信 "wx.getUserInfo" 接口，再调用后台绑定接口
-二、用户
-	1、微信授权登录
-		request：
-			url: /v1/user/login
-			method： POST
-			body: {
-				"code": "微信授权码"
-			}
-		response：
-			{
-				"user_id": "用户id"，
-				"stauts": 0,
-				"message": "错误信息"
-			}
+func RestPatch(addr string, header map[string]string, body io.Reader) (*http.Response, error) {
+	return request(http.MethodPatch, addr, header, body)
+}
 
-	2、绑定微信用户信息
-		request：
-			url: /v1/user/binding
-			method： POST
-			body: {
-				"signature": "微信数据签名"，
-				"rawData": "用户信息原始数据",
-				"encryptedData": "包含敏感信息的加密用户数据",
-				"iv": "加密算法向量"
-			}
-		response：
-			{
-				"user_id": "用户id"，
-				"stauts": 0,
-				"message": "错误信息"
-			}
-	3、退出登录
-		request：
-			url: /v1/user/logout
-			method： POST
-		response：
-			{
-				"user_id": "用户id"，
-				"stauts": 0,
-				"message": "错误信息"
-			}
+func RestDelete(addr string, header map[string]string, body io.Reader) (*http.Response, error) {
+	return request(http.MethodDelete, addr, header, body)
+}
 
-三、活动
-	1、获取活动列表
-		request：
-			url: /v1/activities
-			method： GET
-			query:
-				from: 分页请求开始的活动ID （默认0: 视为第一次获取）
-				count: 分页需要的条数 （默认值30： 0 < count < 100）
-		response：
-            {
-              "total": 2,                                               //总条数
-              "list": [                                                 //列表
-                {
-                  "id": 6,                                              //活动ID
-                  "title": "测试数据4",                                 //标题
-                  "country": "China",                                   //国家
-                  "province": "GuangDong",                              //省
-                  "city": "ShenZhen",                                   //市
-                  "detail_url": "https://www.baidu.com",                //详细地址
-                  "publicity_img": "https://www.baidu.com/1.jpg",       //宣传图
-                  "created": "2018-11-12T23:13:34+08:00",               //创建时间
-                  "price": 50,                                          //原定价格
-                  "final": 50,                                          //优惠价格
-                  "quantity": 20,                                       //砍刀次数
-                  "total": 30,                                          //发行数量
-                  "completed": 20,                                      //已完成数量
-                  "daily_total": 10,                                    //日发行数量
-                  "daily_completed": 10,                                //日完成量
-                  "expire_date": "2018-11-16T23:15:21+08:00"            //截止日期
-                }
-              ]
-            }
 
-	2、获取活动详情：
-		request：
-			url: /v1/activities/{activity_id}
-			method： GET
-			path:
-				activity_id: 活动ID
-		response：
-            {
-              "id": 6,                                              //活动ID
-              "title": "测试数据4",                                 //标题
-              "country": "China",                                   //国家
-              "province": "GuangDong",                              //省
-              "city": "ShenZhen",                                   //市
-              "detail_url": "https://www.baidu.com",                //详细地址
-              "publicity_img": "https://www.baidu.com/1.jpg",       //宣传图
-              "created": "2018-11-12T23:13:34+08:00",               //创建时间
-              "price": 50,                                          //原定价格
-              "final": 50,                                          //优惠价格
-              "quantity": 20,                                       //砍刀次数
-              "total": 30,                                          //发行数量
-              "completed": 20,                                      //已完成数量
-              "daily_total": 10,                                    //日发行数量
-              "daily_completed": 10,                                //日完成量
-              "expire_date": "2018-11-16T23:15:21+08:00"            //截止日期
-            }
+func request(mothod, addr string, header map[string]string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest(mothod, addr, body)
+	if err != nil {
+		return nil, err
+	}
+	if header != nil {
+		for key, val := range header {
+			req.Header.Add(key, val)
+		}
+	}
 
-	3、领取活动任务并自己砍价
-		request：
-			url: /v1/activities/{activity_id}/tasks
-			method： POST
-			path:
-				activity_id: 活动ID
-            body:
-                {
-                    "message": "任务留言",
-                }
-		response：
-            {
-              "task": {                                             //任务信息
-                "id": 2,                                            //任务ID
-                "message": "任务留言",                              //任务留言
-                "price": 100,                                       //活动价格
-                "final": 80,                                        //优惠价格
-                "discount": 5.35,                                   //已砍刀价格
-                "quantity": 30,                                     //砍刀次数
-                "progress": 0,                                      //已砍人数（不包含自己,默认接任务就自己砍一刀）
-                "user_id": "chenzhu",                               //任务领取人
-                "activity_id": 5,                                   //任务ID
-                "created": "2018-11-12T23:31:10+08:00",             //任务领取时间
-                "status": 0                                         //任务状态 （0: 进行中, 1:待领取, 2:已领取）
-              },
-              "bargain": {                                          //砍刀信息
-                "id": 2,                                            //砍刀ID
-                "discount": 5.35,                                   //砍刀价格
-                "message": "砍刀留言",                               //砍刀留言
-                "user_id": "chenzhu",                               //砍刀人ID
-                "task_id": 2,                                       //所属任务ID
-                "created_at": "2018-11-12T23:31:10.1644966+08:00"   //砍刀时间
-              }
-            }
+	clien := http.Client{
+		Transport: &http.Transport{
+			Proxy:                 proxyFromConf,
+			Dial:                  (&net.Dialer{Timeout: TimeOut, KeepAlive: KeepAlive}).Dial,
+			TLSHandshakeTimeout:   TimeOut,
+			ExpectContinueTimeout: time.Second,
+			TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: TimeOut,
+	}
 
-	4、获取当前活动下用户领取的任务
-		request：
-			url: /v1/activities/{activity_id}/tasks
-			method： GET
-			path:
-				activity_id: 活动ID
-		response：
-            {
-                "id": 2,                                            //任务ID
-                "message": "任务留言",                              //任务留言
-                "price": 100,                                       //活动价格
-                "final": 80,                                        //优惠价格
-                "discount": 5.35,                                   //已砍刀价格
-                "quantity": 30,                                     //砍刀次数
-                "progress": 0,                                      //已砍人数（不包含自己,默认接任务就自己砍一刀）
-                "user_id": "chenzhu",                               //任务领取人
-                "activity_id": 5,                                   //任务ID
-                "created": "2018-11-12T23:31:10+08:00",             //任务领取时间
-                "status": 0                                         //任务状态 （0: 进行中, 1:待领取, 2:已领取）
-            }
+	return clien.Do(req)
+}
 
-	5、领取活动门票
-		request：
-			url: /v1/activities/{activity_id}/coupons
-			method： POST
-			path:
-				activity_id: 活动ID
-		response：
-            {
-              "id": 1,                                              //门票ID
-              "user_id": "chenzhu",                                 //用户ID
-              "activity_id": 6,                                     //相关活动ID
-              "created_at": "2018-11-12T23:49:22+08:00"             //创建时间
-            }
+func FormatURL(addr string) (string, error) {
+	raw, err := url.Parse(addr)
+	if err != nil {
+		return addr, err
+	}
 
-	6、获取当前活动下用户领取的门票
-		request：
-			url: /v1/activities/{activity_id}/coupons
-			method： GET
-			path:
-				activity_id: 活动ID
-		response：
-            {
-              "id": 1,                                              //门票ID
-              "user_id": "chenzhu",                                 //用户ID
-              "activity_id": 6,                                     //相关活动ID
-              "created_at": "2018-11-12T23:49:22+08:00"             //创建时间
-            }
+	if raw.Scheme != "http" && raw.Scheme != "https" {
+		raw.Scheme = "https"
+	}
 
-四、砍价任务
-	1、获取用户任务列表
-		request：
-			url: /v1/tasks
-			method： GET
-			query:
-				from: 分页请求开始的任务ID （默认0: 视为第一次获取）
-				count: 分页需要的条数 （默认值30： 0 < count < 100）
-		response：
-            {
-              "total": 2,                                               //总条数
-              "list": [                                                 //列表
-                  {
-                    "id": 2,                                            //任务ID
-                    "message": "任务留言",                              //任务留言
-                    "price": 100,                                       //活动价格
-                    "final": 80,                                        //优惠价格
-                    "discount": 5.35,                                   //已砍刀价格
-                    "quantity": 30,                                     //砍刀次数
-                    "progress": 0,                                      //已砍人数（不包含自己,默认接任务就自己砍一刀）
-                    "user_id": "chenzhu",                               //任务领取人
-                    "activity_id": 5,                                   //任务ID
-                    "created": "2018-11-12T23:31:10+08:00",             //任务领取时间
-                    "status": 0                                         //任务状态 （0: 进行中, 1:待领取, 2:已领取）
-                  }
-                ]
-            }
+	fu := raw.Scheme + "://" + raw.Host + raw.Path
+	if !strings.HasSuffix(fu, "/") {
+		fu += "/"
+	}
 
-	2、获取任务详细信息
-		request：
-			url: /v1/tasks/{task_id}
-			method： GET
-			path:
-				task_id: 任务ID
-		response：
-            {
-                "id": 2,                                            //任务ID
-                "message": "任务留言",                              //任务留言
-                "price": 100,                                       //活动价格
-                "final": 80,                                        //优惠价格
-                "discount": 5.35,                                   //已砍刀价格
-                "quantity": 30,                                     //砍刀次数
-                "progress": 0,                                      //已砍人数（不包含自己,默认接任务就自己砍一刀）
-                "user_id": "chenzhu",                               //任务领取人
-                "activity_id": 5,                                   //任务ID
-                "created": "2018-11-12T23:31:10+08:00",             //任务领取时间
-                "status": 0                                         //任务状态 （0: 进行中, 1:待领取, 2:已领取）
-            }
+	return fu, nil
+}
 
-	3、删除任务
-		request：
-			url: /v1/tasks/{task_id}
-			method： DELETE
-			path:
-				task_id: 任务ID
-		response：
-            {
-                "id": 2,                                            //任务ID
-                "message": "任务留言",                              //任务留言
-                "price": 100,                                       //活动价格
-                "final": 80,                                        //优惠价格
-                "discount": 5.35,                                   //已砍刀价格
-                "quantity": 30,                                     //砍刀次数
-                "progress": 0,                                      //已砍人数（不包含自己,默认接任务就自己砍一刀）
-                "user_id": "chenzhu",                               //任务领取人
-                "activity_id": 5,                                   //任务ID
-                "created": "2018-11-12T23:31:10+08:00",             //任务领取时间
-                "status": 0                                         //任务状态 （0: 进行中, 1:待领取, 2:已领取）
-            }
+func proxyFromConf(req *http.Request) (*url.URL, error) {
+	if proxyURL == nil || inNoProxies(req.Host) {
+		return nil, nil
+	}
+	return proxyURL, nil
+}
 
-	4、为朋友砍价
-		request：
-			url: /v1/tasks/{task_id}/bargains
-			method： POST
-			path:
-				task_id: 任务ID
-		response：
-            {
-              "task": {                                             //任务信息
-                "id": 2,                                            //任务ID
-                "message": "任务留言",                              //任务留言
-                "price": 100,                                       //活动价格
-                "final": 80,                                        //优惠价格
-                "discount": 5.35,                                   //已砍刀价格
-                "quantity": 30,                                     //砍刀次数
-                "progress": 0,                                      //已砍人数（不包含自己,默认接任务就自己砍一刀）
-                "user_id": "chenzhu",                               //任务领取人
-                "activity_id": 5,                                   //任务ID
-                "created": "2018-11-12T23:31:10+08:00",             //任务领取时间
-                "status": 0                                         //任务状态 （0: 进行中, 1:待领取, 2:已领取）
-              },
-              "bargain": {                                          //砍刀信息
-                "id": 2,                                            //砍刀ID
-                "discount": 5.35,                                   //砍刀价格
-                "message": "砍刀留言",                               //砍刀留言
-                "user_id": "chenzhu",                               //砍刀人ID
-                "task_id": 2,                                       //所属任务ID
-                "created_at": "2018-11-12T23:31:10.1644966+08:00"   //砍刀时间
-              }
-            }
+func inNoProxies(addr string) bool {
+	if len(noProxies) == 0 {
+		return false
+	}
 
-	5、获取当前任务下的砍价列表
-		request：
-			url: /v1/tasks/{task_id}/bargains
-			method： GET
-			path:
-				task_id: 任务ID
-			query:
-				from: 分页请求开始的砍价ID （默认0: 视为第一次获取）
-				count: 分页需要的条数 （默认值30： 0 < count < 100）
-		response：
-            {
-              "total": 2,                                               //总条数
-              "list": [                                                 //列表
-                  {
-                    "id": 2,                                            //砍刀ID
-                    "discount": 5.35,                                   //砍刀价格
-                    "message": "砍刀留言",                               //砍刀留言
-                    "user_id": "chenzhu",                               //砍刀人ID
-                    "task_id": 2,                                       //所属任务ID
-                    "created_at": "2018-11-12T23:31:10.1644966+08:00"   //砍刀时间
-                  }
-                ]
-            }
+	for i := range noProxies {
+		if strings.Contains(addr, noProxies[i]) {
+			return true
+		}
+	}
 
-五、门票
-	1、获取用户门票列表
-		request：
-			url: /v1/coupons
-			method： GET
-			query:
-				from: 分页请求开始的门票ID （默认0: 视为第一次获取）
-				count: 分页需要的条数 （默认值30： 0 < count < 100）
-		response：
-            {
-              "total": 1,                                               //总条数
-              "list": [                                                 //列表
-                {
-                  "id": 1,                                              //门票ID
-                  "user_id": "chenzhu",                                 //用户ID
-                  "activity_id": 6,                                     //相关活动ID
-                  "created_at": "2018-11-12T23:49:22+08:00"             //创建时间
-                }
-              ]
-            }
-	2、获取门票详情
-		request：
-			url: /v1/coupons/{coupon_id}
-			method： GET
-			path:
-				coupon_id: 门票ID
-		response：
-            {
-              "id": 1,                                              //门票ID
-              "user_id": "chenzhu",                                 //用户ID
-              "activity_id": 6,                                     //相关活动ID
-              "created_at": "2018-11-12T23:49:22+08:00"             //创建时间
-            }
-	3、删除/兑换实体门票
-		request：
-			url: /v1/coupons/{coupon_id}
-			method： DELETE
-			path:
-				coupon_id: 门票ID
-		response：
-            {
-              "id": 1,                                              //门票ID
-              "user_id": "chenzhu",                                 //用户ID
-              "activity_id": 6,                                     //相关活动ID
-              "created_at": "2018-11-12T23:49:22+08:00"             //创建时间
-            }
+	return false
+}
+
+func SetProxyAddress(addr string) {
+	proxy, err := url.Parse(addr)
+	if err == nil {
+		proxyURL = proxy
+	}
+}
+
+func SetNoProxies(noProxiesAddr ...string) {
+	for i := range noProxiesAddr {
+		if noProxiesAddr[i] == "" {
+			continue
+		}
+		noProxies = append(noProxies, noProxiesAddr[i])
+	}
+}
