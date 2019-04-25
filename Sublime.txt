@@ -1,0 +1,36 @@
+1. 安装SublimeText3,请勿打开。（若已打开关了就是）
+
+2. 破解
+3207版本基本杜绝了共享license key的方法
+所以我们要修改验证license时的trigger
+我们需要采用hosts屏蔽法复制以下地址直接粘贴到相应系统的hosts文件内
+系统盘:/windows/system32/drivers/etc/hosts
+
+127.0.0.1 license.sublimehq.com
+127.0.0.1 www.sublimetext.com
+3 修改trigger Win
+https://hexed.it/ 打开软件根目录下的sublime_text.exe
+搜索16进制 97 94 0D 00
+改为  00 00 00 00
+Export
+
+
+4. 激活
+打开Sublime Text 3
+选择Help -> Enter License
+输入
+
+----- BEGIN LICENSE -----
+TwitterInc
+200 User License
+EA7E-890007
+1D77F72E 390CDD93 4DCBA022 FAF60790
+61AA12C0 A37081C5 D0316412 4584D136
+94D7F7D4 95BC8C1C 527DA828 560BB037
+D1EDDD8C AE7B379F 50C9D69D B35179EF
+2FE898C4 8E4277A8 555CE714 E1FB0E43
+D5D52613 C3D12E98 BC49967F 7652EED2
+9D2D2E61 67610860 6D338B72 5CF95C69
+E36B85CC 84991F19 7575D828 470A92AB
+------ END LICENSE ------
+选择Use license
