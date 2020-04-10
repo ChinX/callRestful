@@ -54,7 +54,8 @@
     2、如有需要，设置代理
         proxy_url="http://100.101.190.114:9953"
         export http_proxy=${proxy_url} https_proxy=${proxy_url}
-    2、更新
+    2、更新        
+        pacman-key --init
         pacman -S pacman pacman-mirrors
         pacman -Syu                                     git_for_window更新 filesystem 会变乱
     3、常用命令：
@@ -89,8 +90,14 @@
 
     5、安装基本编译套件
         pacman -S gcc base-devel
+        
+    6、clion 开发环境
+        pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules
+        pacman -S mingw-w64-x86_64-make
+        pacman -S mingw-w64-x86_64-gdb
+        pacman -S mingw-w64-x86_64-toolchain
 
-    6、中文乱码
+    7、中文乱码
         a、 vim /usr/bin/win
             #!/bin/bash
             $@ |iconv -f gbk -t utf-8
@@ -108,6 +115,6 @@
             export LANG="zh_CN.UTF-8"
             export LC_ALL="zh_CN.UTF-8"
 
-    7、常用目录挂载
+    8、常用目录挂载
         vim .bash_profile
         mount -fo binary,noacl,posix=0,user D:/docs ~/docs    
