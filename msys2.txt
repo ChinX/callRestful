@@ -10,7 +10,7 @@
     5、设置cmder默认启动项为：{bash::mintty as Admin}
 
 二、安装git for windows
-    1、下载：https://www.git-scm.com/download/
+    1、下载：https://npm.taobao.org/mirrors/git-for-windows
     2、安装 git 到 D:\worktool\Cmder\vendor\git-for-windows
     3、git config --global http.sslVerify false
     4、使用外部对比工具KDiff3 用作 diff 和 merge 工具，装好后配置 Git：
